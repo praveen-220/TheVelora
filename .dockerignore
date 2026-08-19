@@ -1,0 +1,10 @@
+# name=.dockerignore
+node_modules
+npm-debug.log
+data
+.env
+.DS_Store
+.git
+.github
+*.log
+
