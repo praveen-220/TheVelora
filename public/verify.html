@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verify Account — Velora</title>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <link rel="stylesheet" href="/css/ride.css"/>
+  <link rel="icon" href="/logo.png"/>
+  <style>
+    .verify-container {
+      max-width: 440px;
+      margin: 60px auto;
+      background: var(--bg-surface);
+      padding: 36px 30px;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255, 107, 0, 0.25);
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 30px rgba(255, 107, 0, 0.1);
+      position: relative;
+    }
+    .verify-logo {
+      margin-bottom: 20px;
+    }
+    .verify-icon {
+      font-size: 2.8rem;
+      margin-bottom: 14px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+    .otp-inputs {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .otp-input {
+      width: 46px;
+      height: 52px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-align: center;
+      border: 1.5px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,0.04);
+      color: var(--text-primary);
+      transition: all var(--transition);
+    }
+    .otp-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: rgba(255, 107, 0, 0.08);
+      box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2);
+    }
+    .sandbox-badge {
+      background: rgba(255, 107, 0, 0.12);
+      border: 1px solid rgba(255, 107, 0, 0.3);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      color: var(--primary-light);
+      margin-bottom: 18px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+<div class="verify-container" id="phoneVerifyPanel">
+  <div class="verify-logo">
+    <a href="/" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none;">
+      <img src="/logo.png" alt="Velora Logo" class="brand-logo-img" style="height: 48px; width: 48px;"/>
+      <span class="brand-name">Velora</span>
+    </a>
+  </div>
+  <div class="verify-icon">📱</div>
+  <h2 style="margin-bottom: 8px; font-size: 1.45rem; font-weight: 800;">Verify Phone Number</h2>
+  <p style="color: var(--text-secondary); margin-bottom: 18px; font-size: 0.88rem; line-height: 1.6;">
+    Enter the 6-digit verification OTP code below.
+  </p>
+
+  <div class="form-group" style="text-align: left; margin-bottom: 12px;">
+    <label class="form-label" style="font-size: 0.8rem;">Account Email or Phone Number</label>
+    <div class="input-icon">
+      <span class="icon">👤</span>
+      <input type="text" id="verifyAccount" class="form-input" placeholder="your-email@example.com or phone" style="font-size: 0.88rem; padding: 10px 14px 10px 38px;"/>
+    </div>
+  </div>
+
+  <div id="sandboxNotice" class="sandbox-badge" style="display:none;">
+    <strong>💡 OTP Code:</strong> <span id="sandboxOtp" style="font-size: 1rem; font-weight: 800; color: #fff; letter-spacing: 2px;"></span>
+    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">(To deliver live cellular SMS directly to physical phones, configure Twilio in .env)</div>
+  </div>
+  
+  <div class="otp-inputs" id="otpContainer">
+    <input type="text" maxlength="1" class="otp-input" id="otp1" autofocus inputmode="numeric"/>
+    <input type="text" maxlength="1" class="otp-input" id="otp2" inputmode="numeric"/>
+    <input type="text" maxlength="1" class="otp-input" id="otp3" inputmode="numeric"/>
+    <input type="text" maxlength="1" class="otp-input" id="otp4" inputmode="numeric"/>
+    <input type="text" maxlength="1" class="otp-input" id="otp5" inputmode="numeric"/>
+    <input type="text" maxlength="1" class="otp-input" id="otp6" inputmode="numeric"/>
+  </div>
+  
+  <div id="verifyError" style="display:none; color: var(--danger); font-size: 0.85rem; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); padding: 8px 12px; border-radius: 8px; margin-bottom: 15px;"></div>
+  
+  <button class="btn btn-primary btn-full" id="verifyBtn" onclick="submitOtp()">Verify & Continue</button>
+  
+  <div style="margin-top: 18px; display: flex; justify-content: space-between; font-size: 0.85rem;">
+    <a href="#" onclick="resendOtp(); return false;" style="color: var(--primary-light); font-weight: 600;">🔄 Resend Code</a>
+    <a href="/login.html" style="color: var(--text-muted);">Back to Login</a>
+  </div>
+</div>
+
+<div class="verify-container" id="emailVerifyPanel" style="display:none;">
+  <div class="verify-logo">
+    <a href="/" style="display: inline-flex; align-items: center; gap: 10px; text-decoration: none;">
+      <img src="/logo.png" alt="Velora Logo" class="brand-logo-img" style="height: 48px; width: 48px;"/>
+      <span class="brand-name">Velora</span>
+    </a>
+  </div>
+  <div class="verify-icon">✉️</div>
+  <h2 style="margin-bottom: 10px; font-size: 1.45rem; font-weight: 800;">Email Verification</h2>
+  <p id="emailVerifyMsg" style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
+    Please wait while we verify your email address...
+  </p>
+  <button class="btn btn-primary btn-full" style="display:none;" id="emailLoginBtn" onclick="window.location.href='/login.html'">Proceed to Login</button>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/api.js"></script>
+<script>
+  const inputs = document.querySelectorAll('.otp-input');
+  
+  // Handle OTP inputs and backspace
+  inputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+      if (e.target.value.length >= 1) {
+        e.target.value = e.target.value.slice(-1);
+        if (index < inputs.length - 1) inputs[index + 1].focus();
+      }
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+        inputs[index - 1].focus();
+      }
+    });
+    // Handle pasting all 6 digits
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text').trim().replace(/\D/g, '');
+      if (text.length >= 6) {
+        text.slice(0, 6).split('').forEach((ch, i) => {
+          if (inputs[i]) inputs[i].value = ch;
+        });
+        inputs[5].focus();
+      }
+    });
+  });
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const token = urlParams.get('token');
+  let email = urlParams.get('email') || localStorage.getItem('velora_verify_email') || '';
+  const devOtp = localStorage.getItem('velora_dev_otp');
+
+  if (email) {
+    document.getElementById('verifyAccount').value = email;
+  }
+
+  if (devOtp) {
+    document.getElementById('sandboxNotice').style.display = 'block';
+    document.getElementById('sandboxOtp').textContent = devOtp;
+    // Pre-fill digits for quick testing
+    devOtp.split('').forEach((ch, i) => {
+      if (inputs[i]) inputs[i].value = ch;
+    });
+  }
+
+  if (token && email) {
+    document.getElementById('phoneVerifyPanel').style.display = 'none';
+    document.getElementById('emailVerifyPanel').style.display = 'block';
+    
+    fetch(`/api/auth/verify-email?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          document.getElementById('emailVerifyMsg').textContent = data.error;
+          document.getElementById('emailVerifyMsg').style.color = 'var(--danger)';
+        } else {
+          document.getElementById('emailVerifyMsg').textContent = '✅ Email verified successfully! You can now log in.';
+          document.getElementById('emailVerifyMsg').style.color = 'var(--success)';
+          document.getElementById('emailLoginBtn').style.display = 'block';
+        }
+      })
+      .catch(err => {
+        document.getElementById('emailVerifyMsg').textContent = 'An error occurred during verification.';
+      });
+  }
+
+  async function submitOtp() {
+    const account = document.getElementById('verifyAccount').value.trim();
+    if (!account) {
+      document.getElementById('verifyError').textContent = 'Please enter your account email or phone number.';
+      document.getElementById('verifyError').style.display = 'block';
+      return;
+    }
+
+    const otp = Array.from(inputs).map(i => i.value).join('');
+    if (otp.length !== 6) {
+      document.getElementById('verifyError').textContent = 'Please enter all 6 digits of the OTP code.';
+      document.getElementById('verifyError').style.display = 'block';
+      return;
+    }
+
+    const btn = document.getElementById('verifyBtn');
+    btn.disabled = true;
+    btn.textContent = 'Verifying...';
+    document.getElementById('verifyError').style.display = 'none';
+
+    try {
+      const isEmail = account.includes('@');
+      const payload = isEmail ? { email: account, otp } : { phone: account, otp };
+      const data = await api.verifyPhone(payload);
+
+      localStorage.removeItem('velora_verify_email');
+      localStorage.removeItem('velora_dev_otp');
+      setAuth(data.token, data.user);
+      showToast('success', 'Phone Verified!', `Welcome to Velora, ${data.user.name.split(' ')[0]}!`);
+      
+      setTimeout(() => {
+        if (data.user.role === 'driver') window.location.href = '/driver.html';
+        else if (data.user.role === 'admin') window.location.href = '/admin.html';
+        else window.location.href = '/dashboard.html';
+      }, 1000);
+    } catch (err) {
+      document.getElementById('verifyError').textContent = err.message || 'Invalid OTP code. Please check and try again.';
+      document.getElementById('verifyError').style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Verify & Continue';
+    }
+  }
+
+  async function resendOtp() {
+    const account = document.getElementById('verifyAccount').value.trim();
+    if (!account) {
+      document.getElementById('verifyError').textContent = 'Please enter your account email or phone number to resend.';
+      document.getElementById('verifyError').style.display = 'block';
+      return;
+    }
+
+    try {
+      const isEmail = account.includes('@');
+      const payload = isEmail ? { email: account } : { phone: account };
+      const res = await api.resendOtp(payload);
+
+      if (res.devOtp) {
+        localStorage.setItem('velora_dev_otp', res.devOtp);
+        document.getElementById('sandboxNotice').style.display = 'block';
+        document.getElementById('sandboxOtp').textContent = res.devOtp;
+        res.devOtp.split('').forEach((ch, i) => {
+          if (inputs[i]) inputs[i].value = ch;
+        });
+      }
+
+      showToast('success', 'Code Sent', res.message || 'A new verification code was sent.');
+    } catch (err) {
+      document.getElementById('verifyError').textContent = err.message || 'Failed to resend code.';
+      document.getElementById('verifyError').style.display = 'block';
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+/* ─── Velora Dashboard Styles ─── */
+.dashboard-content {
+  padding: 32px;
+  flex: 1;
+  overflow-y: auto;
+}
+@media (max-width: 768px) {
+  .dashboard-content { padding: 20px 16px; }
+}
+
+/* ─── Search Panel ─── */
+.search-panel {
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.12), rgba(56, 189, 248, 0.06));
+  border: 1px solid rgba(255, 107, 0, 0.25);
+  border-radius: var(--radius-xl);
+  padding: 28px;
+  margin-bottom: 32px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.search-panel::before {
+  content: ''; position: absolute; top: -50%; right: -20%;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 107, 0, 0.18), transparent 70%);
+  pointer-events: none;
+}
+.search-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; }
+.search-form { display: grid; grid-template-columns: 1fr 1fr 180px 140px auto; gap: 12px; align-items: end; }
+@media (max-width: 1100px) {
+  .search-form { grid-template-columns: 1fr 1fr; }
+  .search-form .btn { grid-column: span 2; }
+}
+@media (max-width: 600px) {
+  .search-form { grid-template-columns: 1fr; }
+  .search-form .btn { grid-column: span 1; }
+}
+
+/* ─── Rides List ─── */
+.rides-list { display: flex; flex-direction: column; gap: 12px; }
+.ride-card-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.ride-meta-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-secondary); }
+.ride-meta-icon { font-size: 0.9rem; }
+.ride-card-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.ride-price { font-size: 1.3rem; font-weight: 800; color: var(--text-primary); }
+.ride-price span { font-size: 0.8rem; font-weight: 400; color: var(--text-muted); }
+
+/* ─── Driver Info in Card ─── */
+.driver-info { display: flex; align-items: center; gap: 10px; }
+.driver-rating { display: flex; align-items: center; gap: 4px; font-size: 0.82rem; color: var(--text-secondary); }
+.driver-rating .star-icon { color: #f59e0b; }
+
+/* ─── Booking Panel ─── */
+.booking-form { display: flex; flex-direction: column; gap: 18px; }
+.fare-breakdown {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 10px;
+}
+.fare-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; }
+.fare-row.total { border-top: 1px solid var(--glass-border); padding-top: 10px; margin-top: 4px; font-weight: 700; font-size: 1rem; }
+.fare-row.total .fare-value { color: var(--primary-light); }
+.fare-row .fare-label { color: var(--text-secondary); }
+.fare-split-badge {
+  background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3);
+  border-radius: var(--radius-md); padding: 10px 14px; font-size: 0.85rem; color: #34d399;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ─── Bookings Section ─── */
+.bookings-section { margin-top: 32px; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.booking-card {
+  background: var(--bg-card); border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg); padding: 20px;
+  transition: all var(--transition);
+}
+.booking-card:hover { border-color: var(--glass-border-h); }
+.booking-status { display: flex; align-items: center; gap: 8px; }
+
+/* ─── Profile Card ─── */
+.profile-card {
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.12), rgba(56, 189, 248, 0.06));
+  border: 1px solid rgba(255, 107, 0, 0.25); border-radius: var(--radius-xl); padding: 28px;
+  text-align: center; margin-bottom: 24px;
+}
+.profile-rating { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 8px; }
+
+/* ─── Driver Dashboard ─── */
+.driver-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+@media (max-width: 600px) { .driver-stats { grid-template-columns: 1fr; } }
+
+.offer-ride-card {
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.12), rgba(56, 189, 248, 0.05));
+  border: 1px solid rgba(255, 107, 0, 0.25); border-radius: var(--radius-xl); padding: 28px; margin-bottom: 24px;
+}
+.offer-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.offer-form .full-span { grid-column: span 2; }
+@media (max-width: 600px) {
+  .offer-form { grid-template-columns: 1fr; }
+  .offer-form .full-span { grid-column: span 1; }
+}
+
+/* ─── Passenger Management ─── */
+.passenger-list { display: flex; flex-direction: column; gap: 12px; }
+.passenger-item {
+  background: var(--bg-card); border: 1px solid var(--glass-border); border-radius: var(--radius-md);
+  padding: 14px 16px; display: flex; align-items: center; gap: 12px; transition: all var(--transition);
+}
+.passenger-item:hover { background: var(--bg-card-hover); }
+.passenger-actions { display: flex; gap: 8px; margin-left: auto; }
+
+/* ─── Tabs ─── */
+.tabs { display: flex; gap: 4px; background: var(--bg-surface); border-radius: var(--radius-lg); padding: 4px; margin-bottom: 24px; border: 1px solid var(--glass-border); }
+.tab-btn {
+  flex: 1; padding: 9px 16px; border-radius: var(--radius-md); font-size: 0.875rem;
+  font-weight: 500; color: var(--text-secondary); transition: all var(--transition); text-align: center;
+}
+.tab-btn:hover { color: var(--text-primary); background: var(--bg-card); }
+.tab-btn.active { background: var(--primary); color: white; font-weight: 600; box-shadow: 0 2px 8px var(--primary-glow); }
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+/* ─── Rating Stars Interactive ─── */
+.rating-widget { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 20px 0; }
+.rating-stars { display: flex; gap: 8px; }
+.rating-star { font-size: 2.5rem; cursor: pointer; transition: all var(--transition); color: var(--text-muted); }
+.rating-star:hover, .rating-star.active { color: #f59e0b; transform: scale(1.15); }
+.rating-label { font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; }
+
+/* ─── Notification Panel Header ─── */
+.notif-header { padding: 14px 16px; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; }
+.notif-header-title { font-size: 0.9rem; font-weight: 600; }
+.notif-empty { text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.85rem; }
+
+/* ─── Welcome Banner ─── */
+.welcome-banner {
+  background: linear-gradient(135deg, rgba(255, 107, 0, 0.16), rgba(56, 189, 248, 0.08));
+  border: 1px solid rgba(255, 107, 0, 0.28); border-radius: var(--radius-xl);
+  padding: 28px 32px; margin-bottom: 28px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.welcome-text h2 { font-size: 1.5rem; margin-bottom: 4px; }
+.welcome-text p { color: var(--text-secondary); font-size: 0.9rem; }
+.welcome-emoji { font-size: 3rem; }

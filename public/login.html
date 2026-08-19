@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login & Sign Up — Velora</title>
+  <meta name="description" content="Login or register to access the Velora ride sharing platform."/>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <link rel="stylesheet" href="/css/ride.css"/>
+  <link rel="icon" href="/logo.png"/>
+</head>
+<body>
+
+<div class="auth-page">
+  <!-- Visual Side -->
+  <div class="auth-visual">
+    <div style="position: relative; z-index: 1; text-align: center; max-width: 420px;">
+      <div style="display: flex; justify-content: center; margin-bottom: 24px;">
+        <img src="/logo.png" alt="Velora Logo" style="height: 100px; width: 100px; border-radius: 24px; background: #ffffff; padding: 4px; box-shadow: 0 10px 30px rgba(255, 107, 0, 0.4); border: 2px solid rgba(255, 107, 0, 0.5);"/>
+      </div>
+      <h2 style="font-size: 2.2rem; font-weight: 900; margin-bottom: 14px; line-height: 1.15; letter-spacing: -0.02em;">
+        Ride • Share • <span class="gradient-text">Go Together</span>
+      </h2>
+      <p style="color: var(--text-secondary); margin-bottom: 36px; font-size: 0.95rem; line-height: 1.7;">
+        Join verified passengers and drivers making every commute reliable, sustainable, and affordable.
+      </p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; text-align: left;">
+        <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 16px; padding: 18px;">
+          <div style="font-size: 1.6rem; margin-bottom: 8px;">💸</div>
+          <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; color: var(--text-primary);">Fair Split Fares</div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary);">Transparent split pricing calculated per kilometer.</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 16px; padding: 18px;">
+          <div style="font-size: 1.6rem; margin-bottom: 8px;">🛡️</div>
+          <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; color: var(--text-primary);">Verified Security</div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary);">Real OTP phone verification & instant SOS dispatch.</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 16px; padding: 18px;">
+          <div style="font-size: 1.6rem; margin-bottom: 8px;">📍</div>
+          <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; color: var(--text-primary);">Live Route Map</div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary);">Real-time GPS coordinates and route tracking.</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); border-radius: 16px; padding: 18px;">
+          <div style="font-size: 1.6rem; margin-bottom: 8px;">⭐</div>
+          <div style="font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; color: var(--text-primary);">Two-Way Feedback</div>
+          <div style="font-size: 0.78rem; color: var(--text-secondary);">Direct ratings and reviews for full transparency.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Side -->
+  <div class="auth-form-panel">
+    <div class="auth-form-inner">
+      <div class="auth-logo">
+        <img src="/logo.png" alt="Velora Logo" class="brand-logo-img" style="height: 44px; width: 44px;"/>
+        <span class="auth-logo-text">Velora</span>
+      </div>
+
+      <!-- Tabs -->
+      <div class="auth-tabs" id="authTabs">
+        <div class="auth-tab active" id="loginTab" onclick="switchTab('login')">Log In</div>
+        <div class="auth-tab" id="registerTab" onclick="switchTab('register')">Sign Up</div>
+      </div>
+
+      <!-- Login Form -->
+      <div id="loginPanel">
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-sub">Enter your email and password to access your account</p>
+        <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-icon">
+              <span class="icon">✉️</span>
+              <input type="email" id="loginEmail" class="form-input" placeholder="you@example.com" required autocomplete="email"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-icon">
+              <span class="icon">🔒</span>
+              <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" required autocomplete="current-password"/>
+            </div>
+          </div>
+          <div id="loginError" style="display:none; color: var(--danger); font-size: 0.85rem; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); padding: 10px 14px; border-radius: 8px;"></div>
+          <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
+            <span id="loginBtnText">Log In</span>
+            <div class="spinner spinner-sm" id="loginSpinner" style="display:none;"></div>
+          </button>
+        </form>
+      </div>
+
+      <!-- Register Form -->
+      <div id="registerPanel" style="display:none;">
+        <h1 class="auth-title">Create account</h1>
+        <p class="auth-sub">Join Velora with phone & email verification</p>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label">I want to</label>
+          <div class="role-selector">
+            <div class="role-option selected" id="rolePassenger" onclick="selectRole('passenger')">
+              <div class="role-icon">🧳</div>
+              <div class="role-label">Book Rides</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">Passenger</div>
+            </div>
+            <div class="role-option" id="roleDriver" onclick="selectRole('driver')">
+              <div class="role-icon">🚗</div>
+              <div class="role-label">Offer Rides</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 2px;">Driver</div>
+            </div>
+          </div>
+        </div>
+
+        <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+          <input type="hidden" id="selectedRole" value="passenger"/>
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <div class="input-icon">
+              <span class="icon">👤</span>
+              <input type="text" id="regName" class="form-input" placeholder="Your full name" required/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <div class="input-icon">
+              <span class="icon">✉️</span>
+              <input type="email" id="regEmail" class="form-input" placeholder="you@example.com" required/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number (with country code)</label>
+            <div class="input-icon">
+              <span class="icon">📱</span>
+              <input type="tel" id="regPhone" class="form-input" placeholder="+91 9876543210" required/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="input-icon">
+              <span class="icon">🔒</span>
+              <input type="password" id="regPassword" class="form-input" placeholder="Min. 6 characters" required minlength="6"/>
+            </div>
+          </div>
+
+          <!-- Driver Fields -->
+          <div id="driverFields" style="display:none; flex-direction: column; gap: 16px;">
+            <div class="form-group">
+              <label class="form-label">Vehicle Info & Model</label>
+              <div class="input-icon">
+                <span class="icon">🚗</span>
+                <input type="text" id="regVehicle" class="form-input" placeholder="e.g. Honda City (White)"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">License Plate</label>
+              <div class="input-icon">
+                <span class="icon">🪪</span>
+                <input type="text" id="regPlate" class="form-input" placeholder="e.g. DL-01-AB-1234"/>
+              </div>
+            </div>
+          </div>
+
+          <div id="registerError" style="display:none; color: var(--danger); font-size: 0.85rem; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); padding: 10px 14px; border-radius: 8px;"></div>
+          <button type="submit" class="btn btn-primary btn-full" id="registerBtn">
+            <span id="registerBtnText">Create & Verify Account</span>
+            <div class="spinner spinner-sm" id="registerSpinner" style="display:none;"></div>
+          </button>
+        </form>
+      </div>
+
+      <div class="auth-footer">
+        <span id="switchText">Don't have an account? <a href="#" onclick="switchTab('register'); return false;">Sign up</a></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+</body>
+</html>

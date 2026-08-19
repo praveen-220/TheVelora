@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Driver Dashboard — Velora</title>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <link rel="stylesheet" href="/css/dashboard.css"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link rel="icon" href="/logo.png"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/" class="navbar-brand">
+    <img src="/logo.png" alt="Velora Logo" class="brand-logo-img"/>
+    <span class="brand-name">Velora</span>
+  </a>
+  <div class="navbar-nav">
+    <div class="relative notif-btn">
+      <button class="btn btn-ghost btn-icon" onclick="toggleNotifPanel()" title="Notifications">🔔
+        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+      </button>
+      <div class="notif-panel" id="notifPanel">
+        <div class="notif-header">
+          <span class="notif-header-title">Notifications</span>
+          <button class="btn btn-ghost btn-sm" onclick="markAllRead()" style="font-size:0.75rem;padding:4px 10px;">Mark all read</button>
+        </div>
+        <div id="notifList"><div class="notif-empty">Loading...</div></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);">
+      <div class="avatar avatar-sm" id="navAvatar">?</div>
+      <span id="navName" style="font-size:0.875rem;font-weight:500;"></span>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div class="sidebar-layout">
+    <aside class="sidebar">
+      <div class="sidebar-section">Driver Menu</div>
+      <div class="sidebar-item active" onclick="showSection('overview')" id="nav-overview"><span class="icon">📊</span> Overview</div>
+      <div class="sidebar-item" onclick="showSection('offer')" id="nav-offer"><span class="icon">➕</span> Offer a Ride</div>
+      <div class="sidebar-item" onclick="showSection('myrides')" id="nav-myrides"><span class="icon">🚗</span> My Rides</div>
+      <div class="sidebar-item" onclick="showSection('profile')" id="nav-profile"><span class="icon">👤</span> Profile</div>
+    </aside>
+
+    <main class="dashboard-content">
+
+      <!-- OVERVIEW -->
+      <div id="section-overview">
+        <div class="welcome-banner">
+          <div class="welcome-text">
+            <h2 id="welcomeMsg">Welcome back, Driver!</h2>
+            <p>Manage your rides and passengers from here.</p>
+          </div>
+          <div class="welcome-emoji">🚗</div>
+        </div>
+
+        <div class="driver-stats" id="driverStats">
+          <div class="stat-card">
+            <div class="stat-icon">🚗</div>
+            <div>
+              <div class="stat-value" id="statTotalRides">—</div>
+              <div class="stat-label">Total Rides</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg,#f59e0b,#d97706);">⭐</div>
+            <div>
+              <div class="stat-value" id="statRating">—</div>
+              <div class="stat-label">Avg Rating</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg,#10b981,#059669);">💰</div>
+            <div>
+              <div class="stat-value" id="statEarnings">—</div>
+              <div class="stat-label">Estimated Earnings</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header" style="margin-bottom:16px;">
+          <h3>Recent Rides</h3>
+          <button class="btn btn-primary btn-sm" onclick="showSection('myrides')">View All</button>
+        </div>
+        <div id="recentRides" class="rides-list">
+          <div style="text-align:center;padding:40px;"><div class="spinner" style="margin:0 auto;"></div></div>
+        </div>
+      </div>
+
+      <!-- OFFER RIDE -->
+      <div id="section-offer" style="display:none;">
+        <h2 style="margin-bottom:24px;">Offer a New Ride</h2>
+        <div class="offer-ride-card">
+          <!-- MAP CONTAINER -->
+          <div id="offerMap" style="height:300px; border-radius:var(--radius-md); margin-bottom:16px; border:1px solid var(--glass-border); z-index: 1;"></div>
+          
+          <!-- PRICING PREVIEW WIDGET -->
+          <div id="pricePreviewWidget" style="display:none; margin-bottom:16px; padding:16px; background:var(--bg-card); border-radius:var(--radius-md); border:1px solid var(--glass-border);">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+              <span style="color:var(--text-secondary);">Distance</span>
+              <strong id="previewDistance">—</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+              <span style="color:var(--text-secondary);">Base Rate</span>
+              <strong id="previewRate">—</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; color:var(--primary-light);">
+              <span style="color:var(--primary-light);">Surge Multiplier</span>
+              <strong id="previewSurge">—</strong>
+            </div>
+            <hr style="border:none; border-top:1px solid var(--glass-border); margin:8px 0;"/>
+            <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:700;">
+              <span>Estimated Fare (per seat)</span>
+              <span id="previewFare" style="color:var(--success);">—</span>
+            </div>
+          </div>
+
+          <form id="offerForm" onsubmit="offerRide(event)">
+            <div class="offer-form">
+              <div class="form-group">
+                <label class="form-label">From (Origin) *</label>
+                <div class="input-icon"><span class="icon">📍</span>
+                  <input type="text" id="offerOrigin" class="form-input" placeholder="Starting city / area" required/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">To (Destination) *</label>
+                <div class="input-icon"><span class="icon">🏁</span>
+                  <input type="text" id="offerDest" class="form-input" placeholder="Destination city / area" required/>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Origin Coordinates (lat, lng)</label>
+                <input type="text" id="offerOriginCoords" class="form-input" placeholder="28.6139, 77.2090"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Destination Coordinates (lat, lng)</label>
+                <input type="text" id="offerDestCoords" class="form-input" placeholder="28.5355, 77.3910"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Departure Date & Time *</label>
+                <input type="datetime-local" id="offerTime" class="form-input" required/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Total Seats Available *</label>
+                <select id="offerSeats" class="form-select" required>
+                  <option value="1">1 seat</option>
+                  <option value="2">2 seats</option>
+                  <option value="3" selected>3 seats</option>
+                  <option value="4">4 seats</option>
+                  <option value="5">5 seats</option>
+                  <option value="6">6 seats</option>
+                </select>
+              </div>
+              <div class="form-group full-span">
+                <div style="padding:12px; background:var(--bg-card); border-radius:var(--radius-md); border:1px solid var(--glass-border); color:var(--text-secondary); font-size:0.85rem;">
+                  ℹ️ <strong>Dynamic Pricing:</strong> The price per seat will be calculated automatically by the system based on the distance and your vehicle model/age.
+                </div>
+              </div>
+              <div class="form-group full-span">
+                <label class="form-label">Additional Notes</label>
+                <textarea id="offerNotes" class="form-textarea" placeholder="AC car, no smoking, luggage space available..."></textarea>
+              </div>
+              <div class="full-span" style="display:flex;gap:12px;align-items:center;">
+                <button type="submit" class="btn btn-primary">
+                  <span id="offerBtnText">🚗 Offer This Ride</span>
+                  <div class="spinner spinner-sm" id="offerSpinner" style="display:none;"></div>
+                </button>
+                <div id="offerError" style="color:var(--danger);font-size:0.85rem;"></div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Fare preview -->
+        <div class="card" style="margin-top:16px;">
+          <div class="card-header"><span class="card-title">💡 Fare Tips</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+            <div style="text-align:center;padding:16px;background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--glass-border);">
+              <div style="font-size:1.5rem;margin-bottom:8px;">🏙️</div>
+              <div style="font-weight:600;font-size:0.85rem;">City Rides</div>
+              <div style="color:var(--text-muted);font-size:0.78rem;">₹80–200 / seat</div>
+            </div>
+            <div style="text-align:center;padding:16px;background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--glass-border);">
+              <div style="font-size:1.5rem;margin-bottom:8px;">🛣️</div>
+              <div style="font-weight:600;font-size:0.85rem;">Intercity</div>
+              <div style="color:var(--text-muted);font-size:0.78rem;">₹200–500 / seat</div>
+            </div>
+            <div style="text-align:center;padding:16px;background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--glass-border);">
+              <div style="font-size:1.5rem;margin-bottom:8px;">🗺️</div>
+              <div style="font-weight:600;font-size:0.85rem;">Long Distance</div>
+              <div style="color:var(--text-muted);font-size:0.78rem;">₹400–1000 / seat</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MY RIDES -->
+      <div id="section-myrides" style="display:none;">
+        <div class="section-header">
+          <h2>My Rides</h2>
+          <button class="btn btn-primary btn-sm" onclick="showSection('offer')">+ Offer New Ride</button>
+        </div>
+        <div class="tabs">
+          <div class="tab-btn active" onclick="filterDriverRides('all',this)">All</div>
+          <div class="tab-btn" onclick="filterDriverRides('SCHEDULED',this)">Scheduled</div>
+          <div class="tab-btn" onclick="filterDriverRides('IN_PROGRESS',this)">In Progress</div>
+          <div class="tab-btn" onclick="filterDriverRides('COMPLETED',this)">Completed</div>
+        </div>
+        <div id="driverRidesList" class="rides-list">
+          <div style="text-align:center;padding:40px;"><div class="spinner" style="margin:0 auto;"></div></div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div id="section-profile" style="display:none;">
+        <h2 style="margin-bottom:24px;">Driver Profile</h2>
+        <div class="profile-card">
+          <div class="avatar avatar-xl" id="profileAvatar" style="margin:0 auto 16px;">?</div>
+          <h3 id="profileName">Loading...</h3>
+          <div class="profile-rating">
+            <span style="color:#f59e0b;">⭐</span>
+            <span id="profileRating">—</span>
+            <span style="color:var(--text-muted);font-size:0.8rem;" id="profileRatingCount"></span>
+          </div>
+          <div style="margin-top:8px;"><span class="badge badge-secondary" id="profileRole">Driver</span></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Edit Driver Profile</span></div>
+          <form id="profileForm" onsubmit="updateProfile(event)" style="display:flex;flex-direction:column;gap:16px;">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="profileNameInput" class="form-input"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input type="tel" id="profilePhoneInput" class="form-input"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Car Model</label>
+              <input type="text" id="profileModelInput" class="form-input" placeholder="e.g. Toyota Innova"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Car Age (Years)</label>
+              <input type="number" id="profileAgeInput" class="form-input" placeholder="e.g. 5"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vehicle Info / Color</label>
+              <input type="text" id="profileVehicleInput" class="form-input" placeholder="e.g. White SUV"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">License Plate</label>
+              <input type="text" id="profilePlateInput" class="form-input" placeholder="e.g. DL-01-AB-1234"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bio</label>
+              <textarea id="profileBioInput" class="form-textarea" placeholder="Tell passengers about yourself..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Save Changes</button>
+          </form>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Passengers Modal -->
+<div class="modal-overlay" id="passengersModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <h3 class="modal-title">Ride Passengers</h3>
+      <button class="modal-close" onclick="closeModal('passengersModal')">✕</button>
+    </div>
+    <div id="passengersContent"></div>
+  </div>
+</div>
+
+<!-- Rating Modal (driver rates passenger) -->
+<div class="modal-overlay" id="ratingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Rate Passenger</h3>
+      <button class="modal-close" onclick="closeModal('ratingModal')">✕</button>
+    </div>
+    <div id="ratingModalContent"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/driver.js"></script>
+</body>
+</html>

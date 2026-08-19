@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard — Velora</title>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <link rel="stylesheet" href="/css/ride.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="icon" href="/logo.png"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/" class="navbar-brand">
+    <img src="/logo.png" alt="Velora Logo" class="brand-logo-img"/>
+    <span class="brand-name">Velora Admin</span>
+  </a>
+  <div class="navbar-nav">
+    <span class="badge badge-danger" id="sosAlertBadge" style="display:none;">🚨 Active SOS</span>
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);">
+      <div class="avatar avatar-sm" style="background:linear-gradient(135deg,#ef4444,#dc2626);">A</div>
+      <span id="navName" style="font-size:0.875rem;font-weight:500;">Admin</span>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">Admin Panel</div>
+      <div class="sidebar-item active" onclick="showSection('overview')" id="nav-overview"><span class="icon">📊</span> Overview</div>
+      <div class="sidebar-item" onclick="showSection('users')" id="nav-users"><span class="icon">👥</span> Users</div>
+      <div class="sidebar-item" onclick="showSection('rides')" id="nav-rides"><span class="icon">🚗</span> Rides</div>
+      <div class="sidebar-item" onclick="showSection('bookings')" id="nav-bookings"><span class="icon">🎫</span> Bookings</div>
+      <div class="sidebar-item" onclick="showSection('pricing')" id="nav-pricing"><span class="icon">💵</span> Pricing Rules</div>
+      <div class="sidebar-item" onclick="showSection('sos')" id="nav-sos">
+        <span class="icon">🚨</span> SOS Alerts
+        <span class="badge badge-danger" id="sosBadgeSidebar" style="display:none;margin-left:auto;font-size:0.65rem;">!</span>
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <main class="admin-content">
+
+      <!-- OVERVIEW -->
+      <div id="section-overview">
+        <h2 style="margin-bottom:24px;">📊 Dashboard Overview</h2>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-4 gap-4" style="margin-bottom:28px;" id="statsGrid">
+          <div class="stat-card"><div class="stat-icon">👥</div><div><div class="stat-value" id="st-users">—</div><div class="stat-label">Total Users</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#06b6d4,#3b82f6);">🚗</div><div><div class="stat-value" id="st-rides">—</div><div class="stat-label">Total Rides</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669);">💰</div><div><div class="stat-value" id="st-revenue">—</div><div class="stat-label">Revenue</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:linear-gradient(135deg,#ef4444,#dc2626);">🚨</div><div><div class="stat-value" id="st-sos">—</div><div class="stat-label">Active SOS</div></div></div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-2 gap-6" style="margin-bottom:28px;">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Rides Per Day (Last 7 Days)</span></div>
+            <div class="chart-container"><canvas id="ridesChart"></canvas></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Revenue Trend (Last 7 Days)</span></div>
+            <div class="chart-container"><canvas id="revenueChart"></canvas></div>
+          </div>
+        </div>
+
+        <!-- Top Drivers -->
+        <div class="card">
+          <div class="card-header"><span class="card-title">⭐ Top Rated Drivers</span></div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>#</th><th>Driver</th><th>Rating</th><th>Total Rides</th></tr></thead>
+              <tbody id="topDriversTable"><tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text-muted);">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div id="section-users" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <h2>👥 User Management</h2>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <input type="text" id="userSearch" class="form-input" placeholder="Search by name or email..." style="width:240px;" oninput="debounceUserSearch()"/>
+            <select id="userRoleFilter" class="form-select" style="width:140px;" onchange="loadUsers()">
+              <option value="">All Roles</option>
+              <option value="passenger">Passenger</option>
+              <option value="driver">Driver</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </div>
+        <div class="admin-table-section">
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>User</th><th>Role</th><th>Phone</th><th>Rating</th><th>Rides</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="usersTable"><tr><td colspan="7" style="text-align:center;padding:30px;"><div class="spinner" style="margin:0 auto;"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIDES -->
+      <div id="section-rides" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <h2>🚗 Ride Management</h2>
+          <select id="rideStatusFilter" class="form-select" style="width:160px;" onchange="loadRides()">
+            <option value="">All Statuses</option>
+            <option value="SCHEDULED">Scheduled</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+        <div class="admin-table-section">
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>ID</th><th>Driver</th><th>Route</th><th>Departure</th><th>Seats</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="ridesTable"><tr><td colspan="8" style="text-align:center;padding:30px;"><div class="spinner" style="margin:0 auto;"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOOKINGS -->
+      <div id="section-bookings" style="display:none;">
+        <h2 style="margin-bottom:20px;">🎫 Recent Bookings</h2>
+        <div class="admin-table-section">
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>ID</th><th>Passenger</th><th>Route</th><th>Driver</th><th>Fare</th><th>Status</th><th>Date</th></tr></thead>
+              <tbody id="bookingsTable"><tr><td colspan="7" style="text-align:center;padding:30px;"><div class="spinner" style="margin:0 auto;"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRICING RULES -->
+      <div id="section-pricing" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <h2>💵 Dynamic Pricing Rules</h2>
+          <button class="btn btn-primary" onclick="openPricingModal()">+ Add Rule</button>
+        </div>
+        <div class="admin-table-section">
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>ID</th><th>Car Model</th><th>Max Age (Years)</th><th>Price Per KM</th><th>Created</th><th>Actions</th></tr></thead>
+              <tbody id="pricingTable"><tr><td colspan="6" style="text-align:center;padding:30px;"><div class="spinner" style="margin:0 auto;"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOS ALERTS -->
+      <div id="section-sos" style="display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <h2>🚨 SOS Alert Log</h2>
+          <button class="btn btn-ghost btn-sm" onclick="loadSOS()">🔄 Refresh</button>
+        </div>
+        <div id="sosAlertsList">
+          <div style="text-align:center;padding:40px;"><div class="spinner" style="margin:0 auto;"></div></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Pricing Modal -->
+<div class="modal-overlay" id="pricingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="pricingModalTitle">Add Pricing Rule</h3>
+      <button class="modal-close" onclick="closeModal('pricingModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Car Model</label>
+        <input type="text" id="prcModel" class="form-input" placeholder="e.g. Toyota Innova, Default"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Max Car Age (Years)</label>
+        <input type="number" id="prcAge" class="form-input" placeholder="e.g. 5, 99"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Price Per KM (₹)</label>
+        <input type="number" id="prcRate" class="form-input" placeholder="e.g. 15.5"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('pricingModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="savePricingRule()">Save Rule</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/api.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ride History — Velora</title>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <link rel="stylesheet" href="/css/ride.css"/>
+  <link rel="icon" href="/logo.png"/>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/" class="navbar-brand">
+    <img src="/logo.png" alt="Velora Logo" class="brand-logo-img"/>
+    <span class="brand-name">Velora</span>
+  </a>
+  <div class="navbar-nav">
+    <button class="btn btn-ghost btn-sm" id="backBtn">← Dashboard</button>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div class="container" style="padding-top:40px;padding-bottom:60px;max-width:860px;">
+
+    <div style="margin-bottom:28px;">
+      <h1 style="font-size:1.75rem;font-weight:800;margin-bottom:4px;">Ride History</h1>
+      <p style="color:var(--text-secondary);">All your past rides and bookings</p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-3 gap-4" style="margin-bottom:28px;" id="historySummary">
+      <div class="stat-card">
+        <div class="stat-icon">🎫</div>
+        <div><div class="stat-value" id="sumTotal">—</div><div class="stat-label">Total Rides</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#10b981,#059669);">💰</div>
+        <div><div class="stat-value" id="sumSpent">—</div><div class="stat-label">Total Spent</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">⭐</div>
+        <div><div class="stat-value" id="sumRating">—</div><div class="stat-label">Avg Rating Given</div></div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="history-filters">
+      <div class="filter-chip active" onclick="filterHistory('all',this)">All Rides</div>
+      <div class="filter-chip" onclick="filterHistory('COMPLETED',this)">Completed</div>
+      <div class="filter-chip" onclick="filterHistory('PENDING',this)">Pending</div>
+      <div class="filter-chip" onclick="filterHistory('CONFIRMED',this)">Confirmed</div>
+      <div class="filter-chip" onclick="filterHistory('CANCELLED',this)">Cancelled</div>
+    </div>
+
+    <!-- List -->
+    <div id="historyList">
+      <div style="text-align:center;padding:60px;"><div class="spinner" style="margin:0 auto;"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Rating Modal -->
+<div class="modal-overlay" id="ratingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Rate Your Driver</h3>
+      <button class="modal-close" onclick="closeModal('ratingModal')">✕</button>
+    </div>
+    <div id="ratingModalContent"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/api.js"></script>
+<script src="/js/history.js"></script>
+</body>
+</html>

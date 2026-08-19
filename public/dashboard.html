@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Velora</title>
+  <link rel="stylesheet" href="/css/main.css"/>
+  <link rel="stylesheet" href="/css/dashboard.css"/>
+  <link rel="icon" href="/logo.png"/>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a href="/" class="navbar-brand">
+    <img src="/logo.png" alt="Velora Logo" class="brand-logo-img"/>
+    <span class="brand-name">Velora</span>
+  </a>
+  <div class="navbar-nav">
+    <div class="relative notif-btn">
+      <button class="btn btn-ghost btn-icon" id="notifBtn" onclick="toggleNotifPanel()" title="Notifications">🔔
+        <span class="notif-badge" id="notifBadge" style="display:none;">0</span>
+      </button>
+      <div class="notif-panel" id="notifPanel">
+        <div class="notif-header">
+          <span class="notif-header-title">Notifications</span>
+          <button class="btn btn-ghost btn-sm" onclick="markAllRead()" style="font-size:0.75rem;padding:4px 10px;">Mark all read</button>
+        </div>
+        <div id="notifList"><div class="notif-empty">Loading...</div></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:var(--radius-md);">
+      <div class="avatar avatar-sm" id="navAvatar">?</div>
+      <span id="navName" style="font-size:0.875rem;font-weight:500;"></span>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+  <div class="sidebar-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">Navigation</div>
+      <div class="sidebar-item active" onclick="showSection('search')" id="nav-search">
+        <span class="icon">🔍</span> Find a Ride
+      </div>
+      <div class="sidebar-item" onclick="showSection('bookings')" id="nav-bookings">
+        <span class="icon">🎫</span> My Bookings
+      </div>
+      <div class="sidebar-item" onclick="showSection('history')" id="nav-history">
+        <span class="icon">📋</span> Ride History
+      </div>
+      <div class="sidebar-section">Account</div>
+      <div class="sidebar-item" onclick="showSection('profile')" id="nav-profile">
+        <span class="icon">👤</span> Profile
+      </div>
+      <div class="sidebar-item" onclick="window.location.href='/history.html'" id="nav-hist">
+        <span class="icon">⏱️</span> Full History
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-content">
+
+      <!-- Welcome Banner -->
+      <div class="welcome-banner" id="welcomeBanner">
+        <div class="welcome-text">
+          <h2 id="welcomeMsg">Good morning!</h2>
+          <p>Where are you headed today?</p>
+        </div>
+        <div class="welcome-emoji">🌟</div>
+      </div>
+
+      <!-- SEARCH SECTION -->
+      <div id="section-search">
+        <div class="search-panel">
+          <div class="search-title">🔍 Find Available Rides</div>
+          <form class="search-form" id="searchForm" onsubmit="searchRides(event)">
+            <div class="form-group">
+              <label class="form-label">From</label>
+              <div class="input-icon">
+                <span class="icon">📍</span>
+                <input type="text" id="searchOrigin" class="form-input" placeholder="Origin city or area"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">To</label>
+              <div class="input-icon">
+                <span class="icon">🏁</span>
+                <input type="text" id="searchDest" class="form-input" placeholder="Destination city or area"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Date</label>
+              <input type="date" id="searchDate" class="form-input"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Seats Needed</label>
+              <select id="searchSeats" class="form-select">
+                <option value="">Any</option>
+                <option value="1">1 seat</option>
+                <option value="2">2 seats</option>
+                <option value="3">3 seats</option>
+                <option value="4">4 seats</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">&nbsp;</label>
+              <button type="submit" class="btn btn-primary">
+                <span id="searchBtnText">Search</span>
+                <div class="spinner spinner-sm" id="searchSpinner" style="display:none;"></div>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Results -->
+        <div id="searchResults">
+          <div class="section-header">
+            <h3 id="resultsTitle">Available Rides</h3>
+            <span class="badge badge-primary" id="resultsCount" style="display:none;"></span>
+          </div>
+          <div id="ridesList" class="rides-list">
+            <div class="empty-state">
+              <div class="empty-state-icon">🔍</div>
+              <div class="empty-state-title">Search for rides above</div>
+              <p class="empty-state-desc">Enter your origin and destination to find available rides</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOOKINGS SECTION -->
+      <div id="section-bookings" style="display:none;">
+        <div class="section-header">
+          <h2>My Bookings</h2>
+          <button class="btn btn-primary btn-sm" onclick="showSection('search')">+ Find New Ride</button>
+        </div>
+        <div class="tabs">
+          <div class="tab-btn active" onclick="filterBookings('all',this)">All</div>
+          <div class="tab-btn" onclick="filterBookings('PENDING',this)">Pending</div>
+          <div class="tab-btn" onclick="filterBookings('CONFIRMED',this)">Confirmed</div>
+          <div class="tab-btn" onclick="filterBookings('COMPLETED',this)">Completed</div>
+        </div>
+        <div id="bookingsList" class="rides-list">
+          <div style="text-align:center;padding:40px;"><div class="spinner" style="margin:0 auto;"></div></div>
+        </div>
+      </div>
+
+      <!-- PROFILE SECTION -->
+      <div id="section-profile" style="display:none;">
+        <h2 style="margin-bottom:24px;">My Profile</h2>
+        <div class="profile-card">
+          <div class="avatar avatar-xl" id="profileAvatar" style="margin:0 auto 16px;">?</div>
+          <h3 id="profileName">Loading...</h3>
+          <div class="profile-rating">
+            <span style="color:#f59e0b;">⭐</span>
+            <span id="profileRating">—</span>
+            <span style="color:var(--text-muted);font-size:0.8rem;" id="profileRatingCount"></span>
+          </div>
+          <div style="margin-top:8px;"><span class="badge badge-primary" id="profileRole">Passenger</span></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Edit Profile</span></div>
+          <form id="profileForm" onsubmit="updateProfile(event)" style="display:flex;flex-direction:column;gap:16px;">
+            <div class="form-group">
+              <label class="form-label">Full Name</label>
+              <input type="text" id="profileNameInput" class="form-input" placeholder="Your name"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input type="tel" id="profilePhoneInput" class="form-input" placeholder="+91 ..."/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bio</label>
+              <textarea id="profileBioInput" class="form-textarea" placeholder="Tell drivers a bit about yourself..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="align-self:flex-start;">Save Changes</button>
+          </form>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+          <div class="card-header"><span class="card-title">Change Password</span></div>
+          <form id="pwdForm" onsubmit="changePassword(event)" style="display:flex;flex-direction:column;gap:16px;">
+            <div class="form-group">
+              <label class="form-label">Current Password</label>
+              <input type="password" id="currentPwd" class="form-input" placeholder="••••••••"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" id="newPwd" class="form-input" placeholder="••••••••"/>
+            </div>
+            <button type="submit" class="btn btn-secondary" style="align-self:flex-start;">Update Password</button>
+          </form>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Book Ride Modal -->
+<div class="modal-overlay" id="bookModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Book This Ride</h3>
+      <button class="modal-close" onclick="closeModal('bookModal')">✕</button>
+    </div>
+    <div id="bookModalContent"></div>
+  </div>
+</div>
+
+<!-- Rating Modal -->
+<div class="modal-overlay" id="ratingModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">Rate Your Driver</h3>
+      <button class="modal-close" onclick="closeModal('ratingModal')">✕</button>
+    </div>
+    <div id="ratingModalContent"></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="/js/api.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>
