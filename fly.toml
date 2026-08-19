@@ -1,0 +1,36 @@
+# name=fly.toml
+# Fly configuration file (template). Update `app` and `[[mounts]]` `source`/`destination` if you want custom names.
+# After pushing this branch, run `fly launch --no-deploy --name <your-app-name>` locally to create the app,
+# then create the volume with `fly volumes create <volume-name> --size 1 --region <region>` and deploy.
+
+app = "velora-deploy"
+kill_signal = "SIGINT"
+kill_timeout = 5
+processes = []
+
+[build]
+  # Fly will build using the repository Dockerfile by default. You can optionally set an image.
+  # image = "registry.fly.io/velora-deploy:latest"
+
+[env]
+  PORT = "3000"
+  NODE_ENV = "production"
+
+[[services]]
+  internal_port = 3000
+  protocol = "tcp"
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 2500
+    soft_limit = 2000
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443
+
+# Mount a persistent volume so SQLite database (data/velora.db) persists across deploys.
+[[mounts]]
+  source = "velora-data"
+  destination = "/app/data"
